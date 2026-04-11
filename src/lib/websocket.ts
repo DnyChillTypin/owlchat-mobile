@@ -13,11 +13,11 @@ class WebSocketClient {
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
-            debug: (msg: string) => console.log(msg),
+            // debug: (msg: string) => console.log(msg),
         });
 
         this.client.onWebSocketClose = (event) => {
-            console.warn("WebSocket connection closed:", event);
+            // console.warn("WebSocket connection closed:", event);
             this.isConnected = false;
         };
     }
