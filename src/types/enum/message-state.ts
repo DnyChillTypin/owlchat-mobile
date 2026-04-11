@@ -1,0 +1,1 @@
+export type MessageState = "ORIGIN" | "EDITED" | "REMOVED";
