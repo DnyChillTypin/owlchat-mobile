@@ -3,16 +3,23 @@ import { chatWebSocketClient } from "@/lib/websocket";
 import { useAuthContext } from "@/providers/auth-provider";
 
 interface WebSocketContextProps {
+  isConnected: boolean;
   sendMessage: (destination: string, body: any) => void;
-  subscribeToTopic: (destination: string, callback: (message: any) => void) => void;
+  subscribeToTopic: (destination: string, callback: (message: any) => void) => any;
 }
 
 const WebSocketContext = createContext<WebSocketContextProps | null>(null);
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
+  const [isConnected, setIsConnected] = React.useState(false);
 
   useEffect(() => {
+    // Sync with internal state of the class instance
+    chatWebSocketClient.setStatusListener((status) => {
+      setIsConnected(status);
+    });
+
     if (!isAuthenticated) {
       chatWebSocketClient.disconnect();
       return;
@@ -41,7 +48,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   return (
-    <WebSocketContext.Provider value={{ sendMessage, subscribeToTopic }}>
+    <WebSocketContext.Provider value={{ isConnected, sendMessage, subscribeToTopic }}>
       {children}
     </WebSocketContext.Provider>
   );

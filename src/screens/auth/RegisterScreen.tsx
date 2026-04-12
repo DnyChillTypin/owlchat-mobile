@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { navigate } from '@/navigation/navigationRef';
 import { register } from '@/services/account-service';
 
 export function RegisterScreen() {
@@ -8,7 +8,7 @@ export function RegisterScreen() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const navigation = useNavigation<any>();
+
 
     const handleRegister = async () => {
         if (!email || !password || password !== confirmPassword) {
@@ -25,7 +25,7 @@ export function RegisterScreen() {
             });
 
             Alert.alert("Success", "Account created successfully. Please login.", [
-                { text: "OK", onPress: () => navigation.navigate("Login") }
+                { text: "OK", onPress: () => navigate("Login") }
             ]);
         } catch (error: any) {
             const msg = error.response?.data?.message || "Registration failed. Please try again.";
@@ -91,7 +91,7 @@ export function RegisterScreen() {
 
                     <View className="flex-row justify-center mt-6">
                         <Text className="text-muted-foreground">Already have an account? </Text>
-                        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                        <TouchableOpacity onPress={() => navigate("Login")}>
                             <Text className="text-primary font-bold">Sign in</Text>
                         </TouchableOpacity>
                     </View>

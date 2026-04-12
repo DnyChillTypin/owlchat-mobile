@@ -6,6 +6,7 @@ class WebSocketClient {
     private client: Client;
     private isConnected: boolean = false;
     private wsUrl: string;
+    private onStatusChange?: (isConnected: boolean) => void;
 
     constructor(wsUrl: string) {
         this.wsUrl = wsUrl;
@@ -17,39 +18,56 @@ class WebSocketClient {
         });
 
         this.client.onWebSocketClose = (event) => {
-            // console.warn("WebSocket connection closed:", event);
-            this.isConnected = false;
+            console.warn("WebSocket connection closed:", {
+                code: event.code,
+                reason: event.reason,
+                wasClean: event.wasClean,
+            });
+            if (this.isConnected) {
+                this.isConnected = false;
+                this.onStatusChange?.(false);
+            }
         };
+    }
+
+    setStatusListener(callback: (isConnected: boolean) => void) {
+        this.onStatusChange = callback;
     }
 
     async connect(onConnect: () => void, onError: (error: any) => void) {
         try {
-            const token = await secureStorage.getItem("accessToken");
-            if (!token) {
-                console.error("No access token found in SecureStore.");
-                onError(new Error("No access token found."));
-                return;
-            }
-            
-            const wsUrlWithToken = `${this.wsUrl}?token=Bearer%20${encodeURIComponent(token)}`;
-            console.log("Connecting to WebSocket URL:", wsUrlWithToken);
-            
-            this.client.brokerURL = wsUrlWithToken;
-            
             this.client.onConnect = () => {
-                console.log("WebSocket connected!");
+                console.log("WebSocket connected successfully!");
                 this.isConnected = true;
+                this.onStatusChange?.(true);
                 onConnect();
             };
+
             this.client.onStompError = (frame) => {
                 console.error("STOMP error:", frame);
                 this.isConnected = false;
+                this.onStatusChange?.(false);
                 onError(frame);
+            };
+
+            // This is critical: fetch a fresh token right before every (re)connect attempt
+            this.client.beforeConnect = async () => {
+                console.log("WebSocket: Preparing connection pulse...");
+                const token = await secureStorage.getItem("accessToken");
+                if (!token) {
+                    console.error("WebSocket: No access token found during connection pulse.");
+                    return;
+                }
+                const wsUrlWithToken = `${this.wsUrl}?token=${encodeURIComponent(token)}`;
+                console.log("WebSocket: Pulse refreshing brokerage URL (token length: " + token.length + ")");
+                this.client.brokerURL = wsUrlWithToken;
             };
 
             this.client.activate();
         } catch (e) {
-            console.error("WebSocket connect error", e);
+            console.error("WebSocket activation error:", e);
+            this.isConnected = false;
+            this.onStatusChange?.(false);
             onError(e);
         }
     }
@@ -58,6 +76,7 @@ class WebSocketClient {
         if (this.client.active) {
             this.client.deactivate();
             this.isConnected = false;
+            this.onStatusChange?.(false);
         }
     }
 
@@ -67,7 +86,7 @@ class WebSocketClient {
                 callback(JSON.parse(message.body));
             });
         } else {
-            console.error("WebSocket is not connected.");
+            console.error("WebSocket is not connected (subscribe called).");
         }
     }
 
@@ -78,7 +97,8 @@ class WebSocketClient {
                 body: JSON.stringify(body),
             });
         } else {
-            console.error("WebSocket is not connected.");
+            console.error("WebSocket is not connected (send called).");
+            throw new Error("WebSocket is not connected.");
         }
     }
 }

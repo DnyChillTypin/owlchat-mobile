@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react
 import { ThemedCard } from '@/components/shared/ThemedCard';
 import { ThemedButton } from '@/components/shared/ThemedButton';
 import { Avatar } from '@/components/shared/Avatar';
-import { useNavigation } from '@react-navigation/native';
+import { goBack } from '@/navigation/navigationRef';
 import { CircleArrowLeft, ShieldAlert } from 'lucide-react-native';
 
 // Placeholder mock service for admin users fetching since admin-service wasn't ported explicitly in Phase 3
@@ -21,7 +21,7 @@ const fetchAllUsers = async () => {
 };
 
 export function AdminUsersScreen() {
-  const navigation = useNavigation<any>();
+
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,7 @@ export function AdminUsersScreen() {
   return (
     <View className="flex-1 bg-background">
       <View className="flex-row items-center p-4 border-b border-border bg-card">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
+        <TouchableOpacity onPress={() => goBack()} className="mr-3">
           <CircleArrowLeft size={24} color="#34B77B" />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-foreground">User Management</Text>

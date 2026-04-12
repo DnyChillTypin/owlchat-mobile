@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatBody } from './components/ChatBody';
@@ -10,6 +10,7 @@ import { useChatMemberUser } from '@/hooks/use-chat-member-user';
 import { useUserProfileContext } from '@/providers/user-profile-provider';
 import { useWebSocket } from '@/providers/websocket-provider';
 import { MessageType } from '@/types/enum/mesage-type';
+import { messageUserService } from '@/services/message-user-service';
 
 export function ConversationDetailScreen() {
   const route = useRoute<any>();
@@ -35,22 +36,28 @@ export function ConversationDetailScreen() {
   const { profile } = useUserProfileContext();
   const { getChatByChatId } = useChatUser();
   const { getChatMembersByChatId } = useChatMemberUser();
-  const { sendMessage, subscribeToTopic } = useWebSocket();
+  const { isConnected, sendMessage, subscribeToTopic } = useWebSocket();
 
   // 1. WebSocket Subscription
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId || !isConnected) return;
 
+    // The backend topic is /topic/chat/{chatId}
     const topic = `/topic/chat/${conversationId}`;
-    subscribeToTopic(topic, (msg) => {
-      const newMessage = JSON.parse(msg.body);
-      // Only add if not already in list (avoid duplicates from optimistic UI)
+    console.log("Subscribing to topic:", topic);
+
+    return subscribeToTopic(topic, (notification) => {
+      // The backend sends a NotificationDto { type, action, data }
+      // The actual message is in notification.data
+      const message = notification.data || notification;
+      
       setMessages((prev) => {
-        if (prev.find((m) => m.id === newMessage.id)) return prev;
-        return [newMessage, ...prev];
+        // Prevent duplicate messages (since we also add optimistically in REST hook)
+        if (prev.find((m) => m.id === message.id)) return prev;
+        return [message, ...prev];
       });
     });
-  }, [conversationId, subscribeToTopic]);
+  }, [conversationId, isConnected, subscribeToTopic]);
 
   // 2. Fetch Chat Metadata
   useEffect(() => {
@@ -84,7 +91,7 @@ export function ConversationDetailScreen() {
     if (profile?.id) initChat();
   }, [conversationId, profile?.id]);
 
-  // 3. Pagination
+  // 3. Pagination & Fetching
   const fetchMessages = useCallback(async (targetPage: number) => {
     try {
       const size = 20;
@@ -110,16 +117,18 @@ export function ConversationDetailScreen() {
   };
 
   const handleSendMessage = async (content: string) => {
-    // Optimistic UI happens inside useMessageUser hook or via WS push
+    if (!content.trim()) return;
+
     try {
-        // We push to the STOMP endpoint
-        sendMessage(`/app/chat/${conversationId}`, {
-            content,
-            senderId: profile?.id,
-            type: MessageType.TEXT
+        // Call the raw service directly to avoid the hook's optimistic state update.
+        // The WebSocket subscription is the sole source of truth for new messages.
+        await messageUserService.postNewTextMessage(null, null, {
+            chatId: conversationId,
+            content: content.trim()
         });
     } catch (err) {
       console.error("Failed to send message:", err);
+      Alert.alert("Error", "Failed to send message. Please try again.");
     }
   };
 
@@ -136,7 +145,7 @@ export function ConversationDetailScreen() {
       <ChatHeader 
         imageUrl={chatMetadata.avatar} 
         name={chatMetadata.name} 
-        isOnline={chatMetadata.isOnline} 
+        isOnline={chatMetadata.isOnline && isConnected} 
       />
       
       <KeyboardAvoidingView 

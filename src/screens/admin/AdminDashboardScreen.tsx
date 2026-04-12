@@ -3,10 +3,10 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedCard } from '@/components/shared/ThemedCard';
 import { Users, MessageSquare, Activity, Settings, ChevronRight } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
+import { navigate } from '@/navigation/navigationRef';
 
 export function AdminDashboardScreen() {
-  const navigation = useNavigation<any>();
+
 
   const stats = [
     { label: "Total Users", value: "1,245", icon: <Users size={24} color="#34B77B" /> },
@@ -39,7 +39,7 @@ export function AdminDashboardScreen() {
         <ThemedCard className="p-0 overflow-hidden mb-6">
           <TouchableOpacity 
             className="flex-row items-center p-4 border-b border-border/50"
-            onPress={() => navigation.navigate("AdminUsers")}
+            onPress={() => navigate("AdminUsers")}
           >
             <Users size={20} color="#888" />
             <View className="ml-3 flex-1">

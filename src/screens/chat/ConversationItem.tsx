@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { navigate } from '@/navigation/navigationRef';
 import { Avatar } from '@/components/shared/Avatar';
 import { ThemedCard } from '@/components/shared/ThemedCard';
 import { useChatMemberUser } from "@/hooks/use-chat-member-user";
@@ -22,7 +22,7 @@ export function ConversationItem({
   newestMessageId,
   currentUserId,
 }: ConversationItemProps) {
-  const navigation = useNavigation<any>();
+
   const { getChatMembersByChatId } = useChatMemberUser();
   const { getMessageById } = useMessageUser();
   const { fetchProfileById } = useUserProfile();
@@ -92,7 +92,7 @@ export function ConversationItem({
 
   return (
     <TouchableOpacity 
-      onPress={() => navigation.navigate("ChatDetail", { conversationId: id, title: displayName })}
+      onPress={() => navigate("ChatDetail", { conversationId: id, title: displayName })}
       className="mb-2 px-2"
     >
       <ThemedCard className="flex-row items-center p-3">

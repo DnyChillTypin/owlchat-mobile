@@ -1,5 +1,10 @@
 import { registerRootComponent } from 'expo';
 
+// Polyfills for STOMP and other libraries that expect browser globals
+import { TextEncoder, TextDecoder } from 'text-encoding';
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 import App from './App';
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);

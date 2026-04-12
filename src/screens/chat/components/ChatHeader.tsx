@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { goBack } from '@/navigation/navigationRef';
 import { CircleArrowLeft, Phone, Video, Info } from 'lucide-react-native';
 import { Avatar } from '@/components/shared/Avatar';
 
@@ -11,13 +11,11 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({ imageUrl, name, isOnline }: ChatHeaderProps) {
-  const navigation = useNavigation();
-
   return (
     <View className="flex-row items-center justify-between p-3 border-b border-border bg-card">
       <View className="flex-row items-center flex-1">
         <TouchableOpacity 
-          onPress={() => navigation.goBack()}
+          onPress={() => goBack()}
           className="mr-3 p-1"
         >
           <CircleArrowLeft size={24} color="#34B77B" />

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useAuthContext } from '@/providers/auth-provider';
-import { useNavigation } from '@react-navigation/native';
+import { navigate } from '@/navigation/navigationRef';
 
 export function LoginScreen() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const { login } = useAuthContext();
-    const navigation = useNavigation<any>();
+
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -72,7 +72,7 @@ export function LoginScreen() {
 
                     <View className="flex-row justify-center mt-6">
                         <Text className="text-muted-foreground">Don't have an account? </Text>
-                        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                        <TouchableOpacity onPress={() => navigate("Register")}>
                             <Text className="text-primary font-bold">Sign up</Text>
                         </TouchableOpacity>
                     </View>
