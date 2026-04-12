@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuthContext } from '@/providers/auth-provider';
+import { MessageSquare, Users, User } from 'lucide-react-native';
 
 // Placeholder screens
 import { LoginScreen } from '@/screens/auth/LoginScreen';
@@ -11,13 +12,9 @@ import { ConversationsListScreen } from '@/screens/chat/ConversationsListScreen'
 import { ConversationDetailScreen } from '@/screens/chat/ConversationDetailScreen';
 import { FriendsHeaderWrapper } from '@/navigation/FriendsHeaderWrapper';
 import { ProfileScreen } from '@/screens/profile/ProfileScreen';
-import { AdminDashboardScreen } from '@/screens/admin/AdminDashboardScreen';
-import { AdminUsersScreen } from '@/screens/admin/AdminUsersScreen';
-
 const RootStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
-const AdminStack = createNativeStackNavigator();
 const MainTabs = createBottomTabNavigator();
 
 function AuthNavigator() {
@@ -31,10 +28,31 @@ function AuthNavigator() {
 
 function MainTabNavigator() {
   return (
-    <MainTabs.Navigator screenOptions={{ headerShown: false }}>
+    <MainTabs.Navigator 
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ focused, color, size }) => {
+          if (route.name === 'Chat') {
+            return <MessageSquare size={size} color={color} />;
+          } else if (route.name === 'Friends') {
+            return <Users size={size} color={color} />;
+          } else if (route.name === 'Profile') {
+            return <User size={size} color={color} />;
+          }
+        },
+        tabBarActiveTintColor: '#34B77B',
+        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: {
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(0,0,0,0.05)',
+          paddingBottom: 5,
+          paddingTop: 5,
+          height: 60,
+        }
+      })}
+    >
       <MainTabs.Screen name="Chat" component={ConversationsListScreen} />
       <MainTabs.Screen name="Friends" component={FriendsHeaderWrapper} />
-      <MainTabs.Screen name="Admin" component={AdminDashboardScreen} />
       <MainTabs.Screen name="Profile" component={ProfileScreen} />
     </MainTabs.Navigator>
   );
@@ -48,11 +66,6 @@ function MainNavigator() {
         name="ChatDetail" 
         component={ConversationDetailScreen} 
         options={({ route }: any) => ({ title: route.params?.title || 'Chat' })}
-      />
-      <MainStack.Screen 
-        name="AdminUsers" 
-        component={AdminUsersScreen} 
-        options={{ headerShown: false }}
       />
     </MainStack.Navigator>
   );
