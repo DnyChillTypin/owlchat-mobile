@@ -7,6 +7,7 @@ import { AuthProvider } from './src/providers/auth-provider';
 import { ThemeProvider, useTheme } from './src/providers/theme-provider';
 import { UserProfileProvider } from './src/providers/user-profile-provider';
 import { WebSocketProvider } from './src/providers/websocket-provider';
+import { ChatProvider } from './src/providers/chat-provider';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { navigationRef } from './src/navigation/navigationRef';
 import "./global.css";
@@ -40,7 +41,9 @@ export default function App() {
       <AuthProvider>
         <UserProfileProvider>
           <WebSocketProvider>
-            <AppContent />
+            <ChatProvider>
+              <AppContent />
+            </ChatProvider>
           </WebSocketProvider>
         </UserProfileProvider>
       </AuthProvider>

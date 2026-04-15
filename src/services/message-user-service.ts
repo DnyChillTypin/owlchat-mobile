@@ -83,7 +83,7 @@ export const messageUserService = {
     requesterId: string | null = null,
     chatId: string,
     type: string,
-    file: File
+    file: any
   ): Promise<any> {
     // const headers = accountId ? { "X-Account-Id": accountId } : undefined;
     const headers: Record<string, string> = {

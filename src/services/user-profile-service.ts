@@ -87,7 +87,7 @@ export const userProfileService = {
         await apiClient.delete(`${USER_PROFILE_BASE_URL}/${id}`);
     },
 
-    async uploadUserAvatar(id: string, avatarFile: File): Promise<string> {
+    async uploadUserAvatar(id: string, avatarFile: any): Promise<string> {
         const formData = new FormData();
         formData.append("file", avatarFile);
 

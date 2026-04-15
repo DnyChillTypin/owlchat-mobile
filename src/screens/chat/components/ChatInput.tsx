@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Keyboard } from 'react-native';
-import { Plus, SendHorizontal, Image as ImageIcon, FileText } from 'lucide-react-native';
+import { View, TextInput, TouchableOpacity, Keyboard, Text } from 'react-native';
+import { Plus, SendHorizontal, Image as ImageIcon, FileText, X, Reply } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { MessageType } from '@/types/enum/mesage-type';
+import type { Message } from '@/types/message.type';
 
 interface ChatInputProps {
   onSendMessage: (content: string) => Promise<void>;
   onSendFile: (file: any, type: MessageType) => Promise<void>;
+  replyingTo?: Message | null;
+  onCancelReply?: () => void;
 }
 
-export function ChatInput({ onSendMessage, onSendFile }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onSendFile, replyingTo, onCancelReply }: ChatInputProps) {
   const [content, setContent] = useState("");
   const [showActions, setShowActions] = useState(false);
 
@@ -44,8 +47,25 @@ export function ChatInput({ onSendMessage, onSendFile }: ChatInputProps) {
   };
 
   return (
-    <View className="p-2 pb-6 border-t border-border bg-card">
-      <View className="flex-row items-end space-x-2">
+    <View className="border-t border-border bg-card">
+      {replyingTo && (
+        <View className="flex-row items-center justify-between px-4 py-2 bg-muted/50 border-b border-border">
+          <View className="flex-row items-center flex-1">
+            <Reply size={16} color="#34B77B" className="mr-2" />
+            <View className="flex-1">
+              <Text className="text-xs text-primary font-medium">Replying to message</Text>
+              <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+                {replyingTo.type === 'TEXT' ? replyingTo.content : `[${replyingTo.type}]`}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity onPress={onCancelReply} className="p-1">
+            <X size={16} color="#888" />
+          </TouchableOpacity>
+        </View>
+      )}
+      
+      <View className="p-2 pb-6 flex-row items-end space-x-2">
         <TouchableOpacity 
           className="p-3 bg-muted rounded-full"
           onPress={() => setShowActions(!showActions)}

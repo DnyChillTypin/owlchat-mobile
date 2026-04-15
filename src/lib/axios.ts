@@ -12,6 +12,19 @@ const apiClient: AxiosInstance = axios.create({
     withCredentials: true,
 });
 
+// Mutex to prevent multiple simultaneous token refresh calls
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+const onRefreshed = (token: string) => {
+    refreshSubscribers.forEach(cb => cb(token));
+    refreshSubscribers = [];
+};
+
+const addRefreshSubscriber = (cb: (token: string) => void) => {
+    refreshSubscribers.push(cb);
+};
+
 apiClient.interceptors.request.use(async (config) => {
     try {
         const urlPath = (config.url || "").toString();
@@ -52,30 +65,43 @@ apiClient.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
+            if (isRefreshing) {
+                // Queue this request until the token is refreshed
+                return new Promise((resolve) => {
+                    addRefreshSubscriber((newToken: string) => {
+                        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+                        resolve(apiClient(originalRequest));
+                    });
+                });
+            }
+
+            isRefreshing = true;
             try {
                 console.log("Access token expired. Attempting to refresh token...");
                 const refreshTokenValue = await secureStorage.getItem("refreshToken");
                 if (!refreshTokenValue)
                     throw new Error("No refresh token found");
                 
-                // Break the require 
-                // cycle by using axios directly without interceptors
                 const response = await axios.post(`${API_ENDPOINTS.USER_SERVICE}/auth/refresh`, {
                     refreshToken: refreshTokenValue,
                 });
                 
                 const data = response.data;
-                await secureStorage.setItem("accessToken", data.accessToken);
-                originalRequest.headers["Authorization"] =
-                    `Bearer ${data.accessToken}`;
+                const newToken = data.accessToken;
+                await secureStorage.setItem("accessToken", newToken);
+                originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+                onRefreshed(newToken);
 
                 return apiClient(originalRequest);
             } catch (refreshError) {
+                refreshSubscribers = [];
                 await secureStorage.removeItem("accessToken");
                 await secureStorage.removeItem("refreshToken");
                 await secureStorage.removeItem("user");
                 resetToAuth();
                 return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
             }
         }
         

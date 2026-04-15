@@ -162,7 +162,7 @@ export const useMessageUser = () => {
             requesterId: string | null,
             chatId: string,
             type: string,
-            file: File,
+            file: any,
         ) => {
             setLoading(true);
             setError(null);

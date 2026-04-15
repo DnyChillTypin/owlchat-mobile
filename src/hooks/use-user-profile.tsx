@@ -122,7 +122,7 @@ export const useUserProfile = () => {
         }
     }, []);
 
-    const uploadAvatar = useCallback(async (id: string, avatarFile: File) => {
+    const uploadAvatar = useCallback(async (id: string, avatarFile: any) => {
         setLoading(true);
         setError(null);
         try {

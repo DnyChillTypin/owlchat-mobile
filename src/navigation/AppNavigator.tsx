@@ -12,6 +12,7 @@ import { ConversationsListScreen } from '@/screens/chat/ConversationsListScreen'
 import { ConversationDetailScreen } from '@/screens/chat/ConversationDetailScreen';
 import { FriendsHeaderWrapper } from '@/navigation/FriendsHeaderWrapper';
 import { ProfileScreen } from '@/screens/profile/ProfileScreen';
+import { EditProfileScreen } from '@/screens/profile/EditProfileScreen';
 const RootStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
@@ -66,6 +67,11 @@ function MainNavigator() {
         name="ChatDetail" 
         component={ConversationDetailScreen} 
         options={({ route }: any) => ({ title: route.params?.title || 'Chat' })}
+      />
+      <MainStack.Screen 
+        name="EditProfile" 
+        component={EditProfileScreen} 
+        options={{ title: 'Edit Profile' }}
       />
     </MainStack.Navigator>
   );

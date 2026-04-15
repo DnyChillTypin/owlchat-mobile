@@ -27,7 +27,11 @@ export function FriendsTabs() {
         tabBarLabelStyle: { fontSize: 13, fontWeight: '700', textTransform: 'none' },
       }}
     >
-      <Tab.Screen name="Friends" component={FriendsScreen} />
+      <Tab.Screen 
+        name="AllFriends" 
+        component={FriendsScreen} 
+        options={{ tabBarLabel: 'Friends' }} 
+      />
       <Tab.Screen name="Requests" component={RequestsScreen} />
       <Tab.Screen name="Discovery" component={DiscoveryScreen} />
     </Tab.Navigator>

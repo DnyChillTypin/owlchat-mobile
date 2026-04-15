@@ -18,11 +18,16 @@ class WebSocketClient {
         });
 
         this.client.onWebSocketClose = (event) => {
-            console.warn("WebSocket connection closed:", {
-                code: event.code,
-                reason: event.reason,
-                wasClean: event.wasClean,
-            });
+            // Code 1000 = normal/clean close (e.g., user logged out). Don't warn for this.
+            if (event.code !== 1000) {
+                console.warn("WebSocket connection closed:", {
+                    code: event.code,
+                    reason: event.reason,
+                    wasClean: event.wasClean,
+                });
+            } else {
+                console.log("WebSocket disconnected cleanly (code 1000).");
+            }
             if (this.isConnected) {
                 this.isConnected = false;
                 this.onStatusChange?.(false);
@@ -58,7 +63,9 @@ class WebSocketClient {
                     console.error("WebSocket: No access token found during connection pulse.");
                     return;
                 }
-                const wsUrlWithToken = `${this.wsUrl}?token=${encodeURIComponent(token)}`;
+                // The API Gateway's JwtGatewayFilter expects the query param to also start with "Bearer "
+                const bearerToken = `Bearer ${token}`;
+                const wsUrlWithToken = `${this.wsUrl}?token=${encodeURIComponent(bearerToken)}`;
                 console.log("WebSocket: Pulse refreshing brokerage URL (token length: " + token.length + ")");
                 this.client.brokerURL = wsUrlWithToken;
             };
