@@ -25,7 +25,23 @@ export interface LogoutResponse {
 }
 
 export interface SignUpRequest {
-    username: string;
-    email: string;
-    password: string;
+  username: string;
+  password: string;
+  email: string;
 }
+
+export interface SignUpResponse {
+  // backend returns generic object → keep flexible
+  id?: string;
+  [key: string]: any;
+}
+
+export interface SignUpAuthenticateRequest {
+  code: string;
+}
+
+export interface AuthenticateResponse {
+  [key: string]: any;
+}
+
+export type RenewCodeResponse = string;

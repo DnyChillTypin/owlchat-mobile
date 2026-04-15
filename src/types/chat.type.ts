@@ -29,3 +29,7 @@ export interface ChatMemberUpdateRoleRequest {
 export interface ChatUpdateNameRequest {
   name: string;
 }
+
+export interface MessageReportRequest {
+  content: string;
+}

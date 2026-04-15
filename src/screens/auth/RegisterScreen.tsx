@@ -1,34 +1,39 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { navigate } from '@/navigation/navigationRef';
-import { register } from '@/services/account-service';
+import { authService } from '@/services/account-service';
 
 export function RegisterScreen() {
     const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
 
     const handleRegister = async () => {
-        if (!email || !password || password !== confirmPassword) {
+        if (!email || !username || !password || password !== confirmPassword) {
             Alert.alert("Error", "Please check your inputs and try again.");
             return;
         }
         
         try {
             setLoading(true);
-            await register({
-                username: email.split('@')[0], // Generate a simple username from email
+            const response = await authService.signup({
+                username: username,
                 email: email,
                 password: password
             });
 
-            Alert.alert("Success", "Account created successfully. Please login.", [
-                { text: "OK", onPress: () => navigate("Login") }
-            ]);
+            const accountId = response?.id;
+            if (!accountId) {
+                throw new Error("No account ID returned from signup");
+            }
+
+            // Navigate to authenticate page with accountId and email
+            navigate("Authenticate" as never, { accountId, email } as never);
         } catch (error: any) {
-            const msg = error.response?.data?.message || "Registration failed. Please try again.";
+            const msg = error.response?.data?.message || error.message || "Registration failed. Please try again.";
             Alert.alert("Registration Error", msg);
         } finally {
             setLoading(false);
@@ -55,6 +60,18 @@ export function RegisterScreen() {
                             onChangeText={setEmail}
                             autoCapitalize="none"
                             keyboardType="email-address"
+                        />
+                    </View>
+
+                    <View>
+                        <Text className="text-foreground font-medium mb-2">Username</Text>
+                        <TextInput 
+                            className="bg-card text-card-foreground border border-border rounded-lg px-4 py-3"
+                            placeholder="johndoe"
+                            placeholderTextColor="#888"
+                            value={username}
+                            onChangeText={setUsername}
+                            autoCapitalize="none"
                         />
                     </View>
                     
