@@ -190,9 +190,7 @@ export const chatMemberUserService = {
   ) {
     try {
       const response = await apiClient.post(`${CHAT_MEMBER_API}/read/chat/${chatId}`, {}, {
-        headers: {
-          "X-Account-Id": accountId || "",
-        },
+        headers: accountId ? { "X-Account-Id": accountId } : undefined,
         params: cleanParams({ requesterId }),
       });
       return response.data;

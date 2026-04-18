@@ -62,6 +62,12 @@ export function ConversationDetailScreen() {
       const message = notification.data || notification;
       const messageId = message.id || message._id;
       
+      // Side effects should be done OUTSIDE the state updater function
+      if (profile?.id) {
+        markAsRead(null, null, conversationId).catch(console.error);
+        markChatAsReadLocally(conversationId);
+      }
+
       setMessages((prev) => {
         const existingIndex = prev.findIndex((m) => (m.id || m._id) === messageId);
         
@@ -73,13 +79,6 @@ export function ConversationDetailScreen() {
         }
 
         console.log(`[WS] Adding new message with id: ${messageId}`);
-        
-        // Auto mark as read if we receive a message while in the chat
-        if (profile?.id) {
-          markAsRead(null, profile.id, conversationId).catch(console.error);
-          markChatAsReadLocally(conversationId);
-        }
-        
         return [message, ...prev];
       });
     });
@@ -92,7 +91,7 @@ export function ConversationDetailScreen() {
   useEffect(() => {
     if (conversationId && profile?.id) {
       // 1. Mark as read on the server
-      markAsRead(null, profile.id, conversationId).catch(console.error);
+      markAsRead(null, null, conversationId).catch(console.error);
       // 2. Clear unread count locally for immediate UI update
       markChatAsReadLocally(conversationId);
     }
@@ -270,8 +269,8 @@ export function ConversationDetailScreen() {
 
             try {
                 await messageUserService.reactToMessage(
-                    profile.account.id,
-                    profile.id,
+                    null,
+                    null,
                     selectedMessage.id,
                     emoji
                 );

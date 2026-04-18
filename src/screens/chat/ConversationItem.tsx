@@ -93,7 +93,7 @@ export function ConversationItem({
         setPreview(msg.senderId === currentUserId ? `You: ${content}` : content);
 
         if (msg.sentDate) {
-          const date = new Date(msg.sentDate);
+          const date = new Date(msg.sentDate.replace(/(\.\d{3})\d+(Z)?$/, '$1$2'));
           setTimeStamp(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         }
       } catch (err) {

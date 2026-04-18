@@ -80,7 +80,7 @@ export function ChatBody({
     <View className="flex-1 bg-background">
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => item.id || (item as any)._id || index.toString()}
         renderItem={renderMessage}
         inverted // Newest messages at bottom
         onEndReached={onLoadMore}

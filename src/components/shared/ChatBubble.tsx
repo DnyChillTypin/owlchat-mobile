@@ -170,7 +170,7 @@ export function ChatBubble({ message, isMe, otherUserAvatar, otherUserName, onRe
             <Text className="text-[10px] text-muted-foreground ml-1">Edited</Text>
           )}
           <Text className="text-[10px] text-muted-foreground mr-1">
-            {format(new Date(message.sentDate), 'HH:mm')}
+            {message.sentDate ? format(new Date(message.sentDate.replace(/(\.\d{3})\d+(Z)?$/, '$1$2')), 'HH:mm') : ''}
           </Text>
           {isMe && !isRemoved && (
             <View className="ml-0.5">

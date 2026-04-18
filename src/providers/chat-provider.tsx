@@ -33,8 +33,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       const chats = Array.isArray(data) ? data : (data.content || []);
       // Sort: Newest activity (message or update) at the top
       const sorted = [...chats].sort((a, b) => {
-        const dateA = new Date(a.newestMessageDate || a.updatedDate || a.createdDate || 0).getTime();
-        const dateB = new Date(b.newestMessageDate || b.updatedDate || b.createdDate || 0).getTime();
+        const normalizeDate = (d: any) => typeof d === 'string' ? d.replace(/(\.\d{3})\d+(Z)?$/, '$1$2') : d;
+        const dateA = new Date(normalizeDate(a.newestMessageDate || a.updatedDate || a.createdDate || 0)).getTime();
+        const dateB = new Date(normalizeDate(b.newestMessageDate || b.updatedDate || b.createdDate || 0)).getTime();
         return dateB - dateA;
       });
       setConversations(sorted);
